@@ -65,12 +65,66 @@
 
 ---
 
+## 1.5. Updates pulled in sau phiên Phase F (commits `c15e1c0` → `9df8a8a`)
+
+User đã push thêm 8 commits sau khi phiên Phase F kết thúc. Pull về fast-forward, working tree clean, **Phase F không bị break** (chỉ touch nhẹ AppModule.kt, RestaurantFcmService.kt, strings.xml trùng lặp cleanup).
+
+| Commit | Message | Impact |
+|--------|---------|--------|
+| `6d77821` | chore: keep keystore out of version control | Thêm `*.jks`, `*.keystore` vào `.gitignore`; xóa 1 key `common_cancel` trùng lặp (cleanup dead code, key vẫn còn ở dòng 13). **Safe.** |
+| `c5e1fc8` | chore(android): add gradle wrapper and bump versions | Thêm `gradlew`, `gradlew.bat`, `gradle-wrapper.properties`. Nên build bằng `./gradlew` từ giờ. |
+| `446018e` | feat(android): V22 repositories, kiosk FCM and home UI updates | Refactor HomeViewModel (Quad field names → `q.a` `q.b` `q.c` `q.d` do Kotlin stdlib 1.9+ có `Quad`), null-safety trên CheckIn/Zones/Auth, FCM build-config fields. |
+| `73b8fd2` | chore(android): add FCM build-config fields and release signing block | Thêm placeholder signing config trong `app/build.gradle.kts` (cần fill thật trước release build). |
+| `6217d98` | feat(server): zone QR regeneration and staffing indicator | New `ZoneQrController` (`POST /api/admin/zones/{id}/qr/regenerate`), staffing count trên zone view. |
+| `d15d1c3` | feat(server): V19 demo data seed | **188 dòng SQL** seed 2 categories, 8 foods, 4 staff, 2 zones, 2 shifts, 1 checklist — giúp demo nhanh. |
+| `2ffc73b` | docs: add smoke test checklist | File `docs/SMOKE-TEST-CHECKLIST.md` (manual test end-to-end). |
+| `9df8a8a` | feat(installer): add lightweight Windows installer scripts | `installer/server/build-installer.bat`, `install.bat`, `uninstall.bat` + README. |
+
+### V19 demo data (NEW)
+
+Database V19 seed sẵn cho demo. Cú pháp để enable:
+- File: `server/src/main/resources/db/migration/V19__demo_data_seed.sql`
+- Default credentials in seed: `admin / admin123`, `staff01 / staff123` (xem file để confirm).
+- **Quan trọng**: Chỉ nên chạy seed ở môi trường demo/dev — KHÔNG chạy production.
+- Nếu đã có data rồi mà muốn reset: `DELETE FROM ...` hoặc drop/create lại schema.
+
+### Installer scripts (NEW)
+
+- `installer/server/build-installer.bat` — build `RestaurantServerSetup.exe` từ .jar output.
+- `installer/server/install.bat` — copy jar + tạo Desktop shortcut + cấu hình firewall rule.
+- `installer/server/uninstall.bat` — cleanup ngược lại.
+- Yêu cầu: Windows 10/11, JDK 21 đã cài (hoặc JRE bundled). Đã test local trên máy dev.
+
+### Smoke test checklist (NEW)
+
+File `docs/SMOKE-TEST-CHECKLIST.md` thay thế `docs/manual-test-checklist.md` (cũ vẫn còn — dùng cái này nếu mới hơn).
+
+### Conflict log Phase F vs new commits
+
+Tất cả 9 commits mới **không touch** files Phase F:
+- ✅ `NotificationsViewModel.kt` — unchanged
+- ✅ `NotificationsScreen.kt` — unchanged
+- ✅ `NotificationsDataSource.kt` + `Impl` — unchanged
+- ✅ `NotificationsRepository.kt` — unchanged
+- ✅ `NotificationsViewModelTest.kt` — unchanged
+- ✅ `shortcuts.xml` + `ic_notification_shortcut.xml` — unchanged
+- ✅ `AndroidManifest.xml` — unchanged
+- ⚠️ `AppModule.kt` — chỉ thêm 1 import line (import mới, không conflict)
+- ⚠️ `RestaurantFcmService.kt` — đổi `runCatching.first()` → `runBlocking.first()` (an toàn — thread safety)
+- ⚠️ `strings.xml` vi + ko — xóa 1 key `common_cancel` trùng lặp ở section Kiosk (key ở dòng 13 vẫn còn, code dùng ok)
+
+→ **Sẵn sàng build APK + chạy smoke test**.
+
+---
+
 ## 2. Trạng thái hiện tại (end-of-session)
 
 ### ✅ Sẵn sàng demo (no blockers)
-- Server boot + cài đặt Windows (Phase 1) — đã có sẵn `RestaurantServerSetup.exe` workflow.
+- Server boot + cài đặt Windows (Phase 1) — `installer/server/install.bat` đã có sẵn.
 - Admin Dashboard end-to-end: login → categories → foods → users → store → shifts → zones → checklists → check-ins → activity log → notifications → devices.
 - Android Staff app end-to-end: pairing (QR/manual) → login → home → menu → food detail → profile → settings → shifts → zones → checklists → check-in → **notifications (Phase F)**.
+- **V19 demo data seed** — database tự động có 2 cats, 8 foods, 4 staff, 2 zones, 2 shifts, 1 checklist ngay sau khi server boot lần đầu.
+- **Windows installer** — build script `build-installer.bat` đã sẵn sàng đóng gói `RestaurantServerSetup.exe`.
 
 ### 🟡 Cần action trước khi demo
 | # | Việc | Mức ưu tiên | Effort |
@@ -136,7 +190,22 @@ Làm theo `docs/manual-test-checklist.md` **end-to-end**:
 
 ### Bước 3 — Build Windows installer (P0)
 
-Đóng gói `restaurant-server-1.0.0.jar` thành `RestaurantServerSetup.exe` bằng Inno Setup / WiX (script đã có sẵn trong `installer/` nếu có).
+Đóng gói `restaurant-server-1.0.0.jar` thành `RestaurantServerSetup.exe`:
+
+```cmd
+cd installer\server
+build-installer.bat
+```
+
+Script này:
+- Lấy `server\target\restaurant-server-1.0.0.jar` (đã có ở Bước 1)
+- Tạo `RestaurantServerSetup.exe` (hoặc `.msi` tùy cấu hình Inno Setup)
+
+Sau khi build:
+```cmd
+install.bat   :: cài lên máy khách
+uninstall.bat :: gỡ cài
+```
 
 **Acceptance:**
 - Double-click `.exe` trên Windows 10/11 máy sạch → cài đặt thành công → shortcut Desktop xuất hiện → click shortcut mở dashboard.
