@@ -37,10 +37,18 @@ public class QrCodeService {
     }
 
     public byte[] renderPng(int size) {
+        return renderPayloadPng(payloadJson(), size);
+    }
+
+    /**
+     * Render a QR PNG containing an arbitrary string payload.
+     * Used by zone QR endpoint and any future QR-bearing resource.
+     */
+    public byte[] renderPayloadPng(String payload, int size) {
         try {
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix matrix = writer.encode(
-                payloadJson(),
+                payload,
                 BarcodeFormat.QR_CODE,
                 size, size,
                 Map.of(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M,
@@ -52,5 +60,16 @@ public class QrCodeService {
         } catch (WriterException | IOException e) {
             throw new IllegalStateException("Failed to render QR", e);
         }
+    }
+
+    /** Build the JSON payload encoded in a zone QR. */
+    public String zonePayloadJson(String code, String qrToken, String displayName) {
+        // Display name is best-effort; falls back to code if no translation is known.
+        String safeName = displayName == null || displayName.isBlank() ? code : displayName;
+        return String.format(
+            "{\"type\":\"zone\",\"code\":\"%s\",\"token\":\"%s\",\"name\":\"%s\",\"server\":\"%s\",\"port\":%d}",
+            code, qrToken, safeName.replace("\"", "'"),
+            ip.getLanIp(), ip.getPort()
+        );
     }
 }

@@ -37,6 +37,7 @@ public class SecurityConfig {
                     "/api/health",
                     "/api/server/info",
                     "/api/server/qr.png",
+                    "/api/zones/*/qr.png",
                     "/admin/**",
                     "/uploads/**",
                     "/error"

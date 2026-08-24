@@ -194,6 +194,19 @@ public class V22Controllers {
             return ResponseEntity.ok(ApiResponse.ok(null));
         }
 
+        /**
+         * Regenerate the QR token for a zone. Useful when the printed QR is
+         * lost or compromised. Returns the new token in plaintext (the old
+         * one is invalidated).
+         */
+        @PostMapping("/{id}/qr/regenerate")
+        public ResponseEntity<ApiResponse<V22Dtos.ZoneQrTokenView>> regenerateQr(
+                @PathVariable Long id,
+                @AuthenticationPrincipal JwtAuthFilter.AuthenticatedUser principal) {
+            String token = service.regenerateQrToken(id, principal == null ? null : principal.id());
+            return ResponseEntity.ok(ApiResponse.ok(new V22Dtos.ZoneQrTokenView(id, token)));
+        }
+
         @GetMapping("/{id}/current")
         public ResponseEntity<ApiResponse<List<V22Dtos.ZoneAssignmentView>>> current(
                 @PathVariable Long id) {

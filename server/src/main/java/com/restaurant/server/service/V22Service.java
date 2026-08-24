@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -282,10 +283,16 @@ public class V22Service {
                 : zoneAssignments.findFirstByUserIdAndIsCurrentOrderByEffectiveFromDesc(currentUserId, 1)
                 .map(a -> Map.of(a.getZoneId(), a))
                 .orElse(Map.of());
+        // Bulk-fetch current assignments per zone to compute the staffing indicator.
+        Map<Long, Long> currentStaffByZone = new HashMap<>();
+        for (ZoneAssignment a : zoneAssignments.findAllByIsCurrent(1)) {
+            currentStaffByZone.merge(a.getZoneId(), 1L, Long::sum);
+        }
         return rows.stream().map(z -> {
-            V22Dtos.ZoneView base = V22Dtos.ZoneView.from(z, z.getTranslations());
+            int currentStaff = currentStaffByZone.getOrDefault(z.getId(), 0L).intValue();
+            V22Dtos.ZoneView base = V22Dtos.ZoneView.from(z, z.getTranslations(), currentStaff);
             return new V22Dtos.ZoneView(base.id(), base.code(), base.color(), base.status(),
-                    base.sortOrder(), base.requiredStaff(),
+                    base.sortOrder(), base.requiredStaff(), base.currentStaff(), base.staffingStatus(),
                     currentMap.containsKey(base.id()),
                     base.translations());
         }).toList();
@@ -345,6 +352,35 @@ public class V22Service {
         z.setStatus(Zone.Status.DISABLED);
         zones.save(z);
         audit("ZONE_DISABLE", id, actorId, null);
+    }
+
+    /**
+     * Regenerate the QR token for a zone. Returns the new token. Useful when
+     * a printed QR is lost or compromised.
+     */
+    @Transactional
+    public String regenerateQrToken(Long zoneId, Long actorId) {
+        Zone z = zones.findById(zoneId)
+                .orElseThrow(() -> AppException.notFound("Zone not found"));
+        if (z.getStatus() != Zone.Status.ACTIVE) {
+            throw AppException.badRequest("ZONE_DISABLED", "Cannot regenerate QR for a disabled zone");
+        }
+        String token = generateSecureToken();
+        z.setQrToken(token);
+        z.setQrGeneratedAt(Instant.now());
+        zones.save(z);
+        audit("ZONE_QR_REGENERATE", zoneId, actorId, null);
+        log.info("QR token regenerated for zone {} by actor {}", zoneId, actorId);
+        return token;
+    }
+
+    private static final java.security.SecureRandom SECURE_RANDOM = new java.security.SecureRandom();
+
+    /** Generate a 24-char URL-safe random token (base64, no padding). */
+    private static String generateSecureToken() {
+        byte[] buf = new byte[18];
+        SECURE_RANDOM.nextBytes(buf);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
     }
 
     // ====================== Zone assignments ======================

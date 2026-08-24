@@ -16,4 +16,7 @@ public interface ZoneAssignmentRepository extends JpaRepository<ZoneAssignment, 
     List<ZoneAssignment> findAllByUserIdOrderByEffectiveFromDesc(Long userId);
 
     List<ZoneAssignment> findAllByZoneIdAndIsCurrent(Long zoneId, Integer isCurrent);
+
+    /** All currently-active assignments across all zones (is_current = 1). */
+    List<ZoneAssignment> findAllByIsCurrent(Integer isCurrent);
 }

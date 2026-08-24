@@ -125,19 +125,46 @@ public class V22Dtos {
             String status,
             int sortOrder,
             int requiredStaff,
+            int currentStaff,
+            String staffingStatus,  // OK (>= required) | SHORT (1 thiếu) | EMPTY | UNKNOWN
             boolean currentAssignment,
             List<ZoneTranslationView> translations
     ) {
         public static ZoneView from(Zone z, List<ZoneTranslation> translations) {
+            return from(z, translations, 0);
+        }
+
+        /**
+         * @param z the zone entity
+         * @param translations translations for the zone
+         * @param currentStaff how many staff are currently assigned (is_current=1)
+         */
+        public static ZoneView from(Zone z, List<ZoneTranslation> translations, int currentStaff) {
+            int required = z.getRequiredStaff() == null ? 0 : z.getRequiredStaff();
+            String staffing;
+            if (z.getStatus() != Zone.Status.ACTIVE) {
+                staffing = "DISABLED";
+            } else if (required == 0) {
+                staffing = currentStaff > 0 ? "OK" : "UNKNOWN";
+            } else if (currentStaff >= required) {
+                staffing = "OK";
+            } else if (currentStaff == 0) {
+                staffing = "EMPTY";
+            } else {
+                staffing = "SHORT";
+            }
             return new ZoneView(
                     z.getId(), z.getCode(), z.getColor(),
                     z.getStatus() == null ? "ACTIVE" : z.getStatus().name(),
                     z.getSortOrder() == null ? 0 : z.getSortOrder(),
-                    z.getRequiredStaff() == null ? 0 : z.getRequiredStaff(),
+                    required, currentStaff, staffing,
                     false,
                     translations.stream().map(ZoneTranslationView::from).toList());
         }
     }
+
+    /** Lightweight DTO returned when an admin regenerates a zone QR token. */
+    public record ZoneQrTokenView(Long zoneId, String qrToken) {}
 
     public record ZoneRequest(
             @NotBlank @Size(max = 50) String code,
