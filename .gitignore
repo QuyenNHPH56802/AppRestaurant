@@ -53,6 +53,14 @@ android/*.dex
 android/*.class
 android/.idea/
 android/cordova/
+# Keystore: do NOT commit. Replace with a private keystore for production deployments.
+# Use scripts/generate-release-keystore.ps1 to create one locally.
+android/keystore/
+android/keystore/*.jks
+android/keystore/*.keystore
+android/keystore/keystore.properties
+android/app/release.keystore
+android/app/*.jks
 
 # ─── Maven / Java ────────────────────────────────────────────
 server/target/
