@@ -1,9 +1,9 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("com.android.application") version "8.5.2"
+    id("org.jetbrains.kotlin.android") version "2.0.10"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.10"
+    id("com.google.devtools.ksp") version "2.0.10-1.0.24"
+    id("com.google.dagger.hilt.android") version "2.52"
 }
 
 android {
@@ -20,23 +20,31 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
 
-        // V2.3 / V18 — Firebase Cloud Messaging config. Values are read from
-        // local.properties (which is git-ignored) and injected into BuildConfig
-        // so the secret is never hard-coded. Default to "" so a build without
-        // a configured Firebase project still succeeds; in that mode FCM is
-        // a no-op at runtime (RestaurantFirebaseApp.isConfigured == false)
-        // and only the in-app REST feed is used.
-        fun localProp(key: String): String {
-            val props = java.util.Properties().apply {
-                val f = rootProject.file("local.properties")
-                if (f.exists()) load(f.inputStream())
+        // V2.3 / V18 — Firebase Cloud Messaging config. 
+        // To enable FCM, add these properties to local.properties:
+        // restaurant.fcm.projectId=your-project-id
+        // restaurant.fcm.appId=your-app-id
+        // restaurant.fcm.apiKey=your-api-key
+        // restaurant.fcm.messagingSenderId=your-sender-id
+        // Default values are empty strings (app works without FCM using REST polling).
+        buildConfigField("String", "FCM_PROJECT_ID", "\"\"")
+        buildConfigField("String", "FCM_APP_ID", "\"\"")
+        buildConfigField("String", "FCM_API_KEY", "\"\"")
+        buildConfigField("String", "FCM_SENDER_ID", "\"\"")
+    }
+
+    signingConfigs {
+        create("release") {
+            // Keystore is loaded from android/keystore/ which is git-ignored.
+            // Run scripts/generate-release-keystore.ps1 to create one locally.
+            val ksFile = rootProject.file("keystore/restaurant-release.jks")
+            if (ksFile.exists()) {
+                storeFile = ksFile
+                storePassword = "changeit"
+                keyAlias = "restaurant"
+                keyPassword = "changeit"
             }
-            return props.getProperty(key)?.takeIf { it.isNotBlank() } ?: ""
         }
-        buildConfigField("String", "FCM_PROJECT_ID",     "\"${localProp("restaurant.fcm.projectId")}\"")
-        buildConfigField("String", "FCM_APP_ID",         "\"${localProp("restaurant.fcm.appId")}\"")
-        buildConfigField("String", "FCM_API_KEY",        "\"${localProp("restaurant.fcm.apiKey")}\"")
-        buildConfigField("String", "FCM_SENDER_ID",      "\"${localProp("restaurant.fcm.messagingSenderId")}\"")
     }
 
     buildTypes {
@@ -46,6 +54,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             applicationIdSuffix = ".debug"
