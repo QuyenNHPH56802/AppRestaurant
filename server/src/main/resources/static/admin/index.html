@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Restaurant Server Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+               margin: 0; background: #0f172a; color: #e2e8f0; }
+        header { padding: 24px; background: #1e293b; border-bottom: 1px solid #334155; }
+        h1 { margin: 0; font-size: 20px; }
+        main { padding: 24px; display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; }
+        .card h2 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+        .card .value { font-size: 22px; font-weight: 600; }
+        .card a { display: inline-block; margin-top: 12px; padding: 8px 12px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-size: 13px; }
+        .card a:hover { background: #1d4ed8; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 24px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Restaurant Server Dashboard</h1>
+    </header>
+    <main>
+        <div class="card">
+            <h2>Server Status</h2>
+            <div class="value" id="status">Checking...</div>
+        </div>
+        <div class="card">
+            <h2>API</h2>
+            <div class="value">/api/health</div>
+            <a href="/api/health" target="_blank">Mở</a>
+        </div>
+        <div class="card">
+            <h2>Version</h2>
+            <div class="value" id="version">1.0.0</div>
+        </div>
+        <div class="card">
+            <h2>Server Dashboard</h2>
+            <div class="value">Trạng thái + QR + sao lưu</div>
+            <a href="/admin/server/">Mở</a>
+        </div>
+        <div class="card">
+            <h2>Admin Menu</h2>
+            <div class="value">Món / danh mục / nhân viên</div>
+            <a href="/admin/app/">Mở</a>
+        </div>
+    </main>
+    <div class="actions">
+        <button onclick="location.reload()">Refresh</button>
+    </div>
+    <script>
+        fetch('/api/health')
+            .then(r => r.json())
+            .then(j => {
+                document.getElementById('status').textContent = j.data ? j.data.status : 'unknown';
+                document.getElementById('version').textContent = j.data ? j.data.version : '-';
+            })
+            .catch(() => {
+                document.getElementById('status').textContent = 'offline';
+            });
+    </script>
+</body>
+</html>

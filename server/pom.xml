@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.restaurant</groupId>
+    <artifactId>restaurant-server</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>RestaurantServer</name>
+    <description>LAN-first restaurant server for in-store staff app</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- Spring Boot core -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- PHASE 2: persistence (JPA + SQLite + Flyway + BCrypt via Spring Security) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+        </dependency>
+        <!--
+            Flyway: SQLite is built into flyway-core (no separate driver needed).
+            flyway-sqlite (old name) / flyway-database-nc-sqlite (Flyway 10+ new name)
+            are NOT required for our Spring Boot 3.3 setup.
+        -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-community-dialects</artifactId>
+        </dependency>
+
+        <!-- PHASE 3: JWT (HS256) for stateless API auth -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- PHASE 8: ZXing for QR code generation (server info + pairing) -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+
+        <!-- V2.3 PHASE C: Firebase Admin SDK for FCM push notifications.
+             Kept behind restaurant.fcm.enabled flag at runtime — the jar is on
+             the classpath so deployment packaging stays simple, but no Firebase
+             calls happen when fcm.enabled=false. NoopNotificationProvider is
+             the default bean in that case. -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>restaurant-server</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>10.10.0</version>
+                <configuration>
+                    <url>jdbc:sqlite:${restaurant.data-dir}/restaurant.db?journal_mode=WAL&amp;foreign_keys=on&amp;busy_timeout=5000</url>
+                    <locations>
+                        <location>filesystem:${project.basedir}/src/main/resources/db/migration</location>
+                    </locations>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-database-nc-sqlite</artifactId>
+                        <version>10.10.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.restaurant.server.RestaurantServerApplication</mainClass>
+                </configuration>
+            </plugin>
+
+            <!--
+              PHASE 11 packaging.
+              `mvn -Ppackage clean package` produces:
+                - target/restaurant-server.jar (fat jar, runnable)
+                - target/jpackage/RestaurantServer/  (app-image directory with bundled JRE)
+                - target/RestaurantServerSetup.exe  (Windows installer via Inno Setup)
+
+              The Inno Setup script (installer/server/RestaurantServerSetup.iss) wraps the
+              app-image produced here. Run `iscc installer/server/RestaurantServerSetup.iss`
+              after the jpackage goal to produce the final EXE.
+            -->
+            <plugin>
+                <groupId>org.panteleyev</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>1.7.2</version>
+                <executions>
+                    <execution>
+                        <id>build-app-image</id>
+                        <phase>package</phase>
+                        <goals><goal>jpackage</goal></goals>
+                        <configuration>
+                            <skip>${jpackage.skip}</skip>
+                            <appVersion>1.0.0</appVersion>
+                            <name>RestaurantServer</name>
+                            <vendor>Restaurant Internal</vendor>
+                            <destination>target/jpackage</destination>
+                            <type>APP_IMAGE</type>
+                            <input>target/${project.build.finalName}.jar</input>
+                            <runtimeImage>target/jdk-runtime-image</runtimeImage>
+                            <modulePath>
+                                <param>target/jmods</param>
+                            </modulePath>
+                            <mainClass>com.restaurant.server.RestaurantServerApplication</mainClass>
+                            <javaOptions>
+                                <param>-Dfile.encoding=UTF-8</param>
+                                <param>-XX:+UseG1GC</param>
+                                <param>-Xms64m</param>
+                                <param>-Xmx512m</param>
+                            </javaOptions>
+                            <winMenu>true</winMenu>
+                            <winShortcut>true</winShortcut>
+                            <winDirChooser>true</winDirChooser>
+                            <icon>installer/server/icons/server.ico</icon>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>package</id>
+            <properties>
+                <jpackage.skip>false</jpackage.skip>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.6.1</version>
+                        <executions>
+                            <execution>
+                                <id>copy-dependencies</id>
+                                <phase>package</phase>
+                                <goals><goal>copy-dependencies</goal></goals>
+                                <configuration>
+                                    <outputDirectory>target/lib</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

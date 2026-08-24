@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Restaurant Server</title>
+    <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+    <div id="root">
+        <div class="login-page" id="login-page">
+            <form class="card" id="login-form">
+                <h1>Đăng nhập quản trị</h1>
+                <label>Tên đăng nhập</label>
+                <input type="text" id="login-username" autocomplete="username" required />
+                <label>Mật khẩu</label>
+                <input type="password" id="login-password" autocomplete="current-password" required />
+                <div class="lang-toggle">
+                    <label><input type="radio" name="login-lang" value="vi" checked /> Tiếng Việt</label>
+                    <label><input type="radio" name="login-lang" value="ko" /> 한국어</label>
+                </div>
+                <button type="submit">Đăng nhập</button>
+                <p class="error" id="login-error" hidden></p>
+            </form>
+        </div>
+
+        <div class="app" id="app" hidden>
+            <header class="topbar">
+                <div class="brand">Admin</div>
+                <div class="topbar-actions">
+                    <span class="who" id="who"></span>
+                    <button class="ghost" id="logout-btn">Đăng xuất</button>
+                </div>
+            </header>
+            <main class="main">
+                <nav class="side">
+                    <button data-view="dashboard" class="active">Tổng quan</button>
+                    <button data-view="categories">Danh mục</button>
+                    <button data-view="foods">Món ăn</button>
+                    <button data-view="users">Nhân viên</button>
+                    <button data-view="store">Cửa hàng</button>
+                    <hr class="nav-sep" />
+                    <button data-view="shifts">Ca làm việc</button>
+                    <button data-view="zones">Khu vực</button>
+                    <button data-view="checklists">Checklist</button>
+                    <button data-view="checkins">Check-in log</button>
+                    <button data-view="activity">Activity log</button>
+                    <button data-view="notifications">Thông báo</button>
+                    <button data-view="devices">Thiết bị</button>
+                </nav>
+                <section class="content" id="content"></section>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js" type="module"></script>
+</body>
+</html>

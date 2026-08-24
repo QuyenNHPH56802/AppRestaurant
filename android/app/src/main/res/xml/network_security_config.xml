@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PHASE 1: Cleartext HTTP is allowed only for the local LAN subnet.
+  Real production certs and external hosts will be restricted further in later phases.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- 10.0.2.2 is the host machine from the Android emulator -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <!-- Common private LAN ranges used as fallbacks; real pairing will use exact server IP. -->
+        <domain includeSubdomains="true">192.168.0.0</domain>
+        <domain includeSubdomains="true">192.168.1.0</domain>
+        <domain includeSubdomains="true">192.168.1.1</domain>
+        <domain includeSubdomains="true">10.0.0.0</domain>
+    </domain-config>
+</network-security-config>

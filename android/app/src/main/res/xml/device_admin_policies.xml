@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PHASE 12: device-admin policy declarations. The app intentionally declares
+     no enforced policies here; Lock Task is the policy, and it is enabled
+     programmatically via DevicePolicyManager. Keep this file so the manifest
+     receiver compiles. -->
+<device-admin>
+    <uses-policies>
+        <force-lock />
+    </uses-policies>
+</device-admin>

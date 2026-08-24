@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Phase F — Android Notification UI — Dynamic launcher shortcut for the
+  notifications screen.
+
+  Exposing this as a shortcut lets long-pressing the launcher icon surface
+  a "Thông báo" entry. Combined with the unread-count badge polled by
+  [UnreadBadgeHolder], users get a system-level notification count without
+  needing to install a third-party badge library (which historically breaks
+  on non-Launcher-Pro OEM launchers).
+
+  The shortcut itself is static; the launcher decides whether to show a
+  numeric badge based on the app's notifications channel activity.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="notifications"
+        android:enabled="true"
+        android:icon="@drawable/ic_notification_shortcut"
+        android:shortcutShortLabel="@string/notifications_shortcut_short"
+        android:shortcutLongLabel="@string/notifications_shortcut_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.restaurant.staff"
+            android:targetClass="com.restaurant.staff.MainActivity"
+            android:data="restaurant://staff/notifications" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

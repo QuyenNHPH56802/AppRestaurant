@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: restaurant-server
+  jackson:
+    default-property-inclusion: non_null
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+  datasource:
+    url: jdbc:sqlite:${restaurant.data-dir}/restaurant.db?journal_mode=WAL&foreign_keys=on&busy_timeout=5000
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1
+      pool-name: restaurant-sqlite-pool
+      connection-timeout: 5000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        format_sql: false
+        show_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    # Allow PRAGMA + DDL + DML in the same migration (V1 contains PRAGMA foreign_keys
+    # alongside CREATE TABLE). Without this, Flyway 10+ rejects V1.
+    mixed: true
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+restaurant:
+  data-dir: ${user.home}/RestaurantServer/data
+  uploads-dir: ${user.home}/RestaurantServer/uploads
+  backups-dir: ${user.home}/RestaurantServer/backups
+  logs-dir: ${user.home}/RestaurantServer/logs
+  config-dir: ${user.home}/RestaurantServer/config
+  jwt:
+    issuer: restaurant-server
+    expiration-hours: 12
+  rate-limit:
+    login:
+      attempts: 5
+      window-minutes: 15
+  backup:
+    retention-daily: 30
+    retention-weekly: 12
+    schedule-cron: "0 0 2 * * *"
+    timezone: Asia/Ho_Chi_Minh
+  # V2.3 — FCM push notifications. Disabled by default; flip on after
+  # service-account JSON is provisioned. dryRun=true logs payloads without
+  # calling Firebase, safe for development.
+  fcm:
+    enabled: false
+    project-id: ""
+    credentials-path: firebase-service-account.json
+    dry-run: true
+    stale-after-days: 180
+    # Phase E — retry tuning
+    retry-max-attempts: 5
+    retry-max-per-sweep: 50
+    retry-interval-ms: 300000   # 5 min
+    retry-initial-delay-ms: 60000  # 1 min after startup
+
+logging:
+  level:
+    root: INFO
+    com.restaurant: DEBUG
+  file:
+    path: ${restaurant.logs-dir}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"

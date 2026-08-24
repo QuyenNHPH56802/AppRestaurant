@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PHASE 1: vi defaults. KO translations go in values-ko/strings.xml.
+  Every UI string must be a key here. No hard-coded text in code.
+-->
+<resources>
+    <string name="app_name">Restaurant Staff</string>
+
+    <!-- System UI strings -->
+    <string name="common_loading">Đang tải…</string>
+    <string name="common_retry">Thử lại</string>
+    <string name="common_save">Lưu</string>
+    <string name="common_cancel">Hủy</string>
+    <string name="common_delete">Xóa</string>
+    <string name="common_edit">Sửa</string>
+    <string name="common_back">Quay lại</string>
+    <string name="common_settings">Cài đặt</string>
+    <string name="common_language">Ngôn ngữ</string>
+    <string name="common_no_data">Không có dữ liệu</string>
+    <string name="common_error_generic">Đã xảy ra lỗi. Vui lòng thử lại.</string>
+    <string name="common_offline">Không thể kết nối đến máy chủ.</string>
+    <string name="common_yes">Có</string>
+    <string name="common_no">Không</string>
+    <string name="common_close">Đóng</string>
+
+    <!-- Languages -->
+    <string name="lang_vi">Tiếng Việt</string>
+    <string name="lang_ko">한국어</string>
+
+    <!-- Splash -->
+    <string name="splash_loading">Đang khởi động…</string>
+
+    <!-- Pairing -->
+    <string name="pairing_title">Kết nối máy chủ</string>
+    <string name="pairing_subtitle">Quét mã QR trên màn hình máy chủ để kết nối thiết bị của bạn.</string>
+    <string name="pairing_scan_qr">Quét QR</string>
+    <string name="pairing_manual_entry">Nhập thủ công</string>
+    <string name="pairing_server_label">Địa chỉ máy chủ</string>
+    <string name="pairing_port_label">Cổng</string>
+    <string name="pairing_connect">Kết nối</string>
+    <string name="pairing_settings_server">Cài đặt máy chủ</string>
+    <string name="pairing_test_success">Kết nối thành công.</string>
+    <string name="pairing_test_failed">Không thể kết nối. Kiểm tra địa chỉ và thử lại.</string>
+    <string name="pairing_camera_permission">Cần quyền truy cập camera để quét mã QR.</string>
+
+    <!-- V2.2 — operational screens (shifts, zones, checklists, check-in) -->
+    <string name="shifts_title">Lịch làm việc của tôi</string>
+    <string name="shifts_empty">Chưa có ca làm nào được phân.</string>
+    <string name="shifts_date">Ngày</string>
+    <string name="shifts_notes">Ghi chú</string>
+    <string name="shifts_accept">Nhận ca</string>
+    <string name="shifts_reject">Từ chối</string>
+    <string name="shifts_change">Đổi ca</string>
+    <string name="shifts_cancel">Hủy ca</string>
+
+    <string name="zones_title">Khu vực làm việc</string>
+    <string name="zones_current">Khu vực hiện tại</string>
+    <string name="zones_current_badge">Đang ở đây</string>
+    <string name="zones_assign">Chuyển tới đây</string>
+
+    <string name="checklists_title">Danh sách công việc</string>
+    <string name="checklists_empty">Chưa có danh sách công việc nào.</string>
+    <string name="checklists_done">Hoàn thành</string>
+    <string name="checklists_skip">Bỏ qua</string>
+
+    <string name="checkin_title">Chấm công</string>
+    <string name="checkin_recent">Lịch sử gần đây</string>
+    <string name="checkin_in">Vào</string>
+    <string name="checkin_out">Ra</string>
+
+    <!-- Auth -->
+    <string name="login_title">Đăng nhập</string>
+    <string name="login_username">Tên đăng nhập</string>
+    <string name="login_password">Mật khẩu</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="login_invalid_credentials">Tên đăng nhập hoặc mật khẩu không đúng.</string>
+    <string name="login_error_network">Lỗi mạng. Vui lòng kiểm tra kết nối.</string>
+
+    <!-- Home -->
+    <string name="home_greeting">Xin chào, %1$s</string>
+    <string name="home_featured">Món nổi bật</string>
+    <string name="home_categories">Danh mục</string>
+    <string name="home_popular">Món đang bán</string>
+
+    <!-- Menu -->
+    <string name="menu_title">Thực đơn</string>
+    <string name="menu_search_hint">Tìm món ăn…</string>
+    <string name="menu_category_all">Tất cả</string>
+    <string name="menu_status_available">Đang bán</string>
+    <string name="menu_status_sold_out">Hết món</string>
+    <string name="menu_status_hidden">Đã ẩn</string>
+    <string name="menu_featured_badge">Nổi bật</string>
+    <string name="menu_empty">Không tìm thấy món nào.</string>
+
+    <!-- Food detail -->
+    <string name="food_price_format">₫%1$s</string>
+    <string name="food_ingredients">Thành phần</string>
+    <string name="food_description">Mô tả</string>
+    <string name="food_portion">Khẩu phần</string>
+    <string name="food_status_label">Trạng thái</string>
+    <string name="food_category_label">Danh mục</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Hồ sơ</string>
+    <string name="profile_logout">Đăng xuất</string>
+    <string name="profile_role_admin">Quản trị viên</string>
+    <string name="profile_role_staff">Nhân viên</string>
+    <string name="profile_full_name">Họ và tên</string>
+    <string name="profile_role_label">Vai trò</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_server">Máy chủ</string>
+    <string name="settings_kiosk">Chế độ kiosk</string>
+    <string name="settings_kiosk_enable">Bật chế độ kiosk</string>
+    <string name="settings_kiosk_disable">Tắt chế độ kiosk</string>
+    <string name="settings_kiosk_pin_title">Nhập mã PIN quản trị</string>
+    <string name="settings_kiosk_pin_helper">Mã PIN dùng để thoát chế độ kiosk khi cần bảo trì.</string>
+    <string name="settings_kiosk_section_title">Chế độ Kiosk</string>
+    <string name="settings_kiosk_section_desc_device_owner">Thiết bị đã đăng ký Device Owner — khóa cứng.</string>
+    <string name="settings_kiosk_section_desc_no_owner">Thiết bị chưa đăng ký Device Owner — sẽ dùng Screen Pinning (cần xác nhận trên điện thoại).</string>
+    <string name="settings_kiosk_toggle_label">Bật chế độ Kiosk</string>
+    <string name="settings_kiosk_toggle_desc">Khóa thiết bị vào ứng dụng. Thoát bằng mã PIN.</string>
+    <string name="settings_kiosk_pin_label">Mã PIN quản trị</string>
+    <string name="settings_kiosk_pin_set">Đã đặt PIN. Bấm để đổi.</string>
+    <string name="settings_kiosk_pin_unset">Chưa đặt — bắt buộc trước khi bật Kiosk.</string>
+    <string name="settings_kiosk_pin_set_button">Đặt</string>
+    <string name="settings_kiosk_pin_change_button">Đổi</string>
+    <string name="settings_kiosk_pin_dialog_title">Đặt mã PIN quản trị (4–8 số)</string>
+    <string name="settings_kiosk_pin_save">Lưu</string>
+    <string name="settings_kiosk_pin_too_short">PIN phải có ít nhất 4 số</string>
+    <string name="profile_exit_kiosk">Thoát chế độ Kiosk</string>
+    <string name="kiosk_exit_dialog_title">Nhập PIN quản trị để thoát Kiosk</string>
+    <string name="kiosk_exit_confirm">Thoát</string>
+    <string name="common_cancel">Hủy</string>
+
+    <!-- Store -->
+    <string name="store_address">Địa chỉ</string>
+    <string name="store_phone">Điện thoại</string>
+    <string name="store_opening_hours">Giờ mở cửa</string>
+
+    <!-- Phase banner -->
+    <string name="phase_banner">PHASE 1 — Skeleton build. APK chạy và sẵn sàng cho PHASE 5+.</string>
+
+    <!-- V2.3 / V18 — In-app notifications (Phase D) -->
+    <string name="notifications_title">Thông báo</string>
+    <string name="notifications_empty">Bạn chưa có thông báo nào.</string>
+    <string name="notifications_mark_all_read">Đánh dấu tất cả đã đọc</string>
+    <string name="notifications_unread_badge">%1$d chưa đọc</string>
+    <string name="notifications_unread_zero">Không có thông báo mới</string>
+    <string name="notifications_type_SHIFT_ASSIGNED">Phân ca</string>
+    <string name="notifications_type_SHIFT_CHANGED">Đổi ca</string>
+    <string name="notifications_type_SHIFT_CANCELLED">Hủy ca</string>
+    <string name="notifications_type_ZONE_CHANGED">Đổi khu vực</string>
+    <string name="notifications_type_ZONE_ASSIGNED">Phân khu vực</string>
+    <string name="notifications_type_MANAGER_MESSAGE">Tin nhắn từ quản lý</string>
+    <string name="notifications_type_SYSTEM_ALERT">Hệ thống</string>
+    <string name="notifications_type_SCHEDULE_PUBLISHED">Lịch tuần</string>
+    <string name="notifications_detail_loading">Đang tải nội dung…</string>
+    <string name="notifications_detail_error">Không tải được thông báo.</string>
+    <string name="notifications_permission_request">Bật thông báo để nhận phân ca, đổi ca từ quản lý.</string>
+    <string name="notifications_permission_title">Cho phép gửi thông báo</string>
+    <string name="notifications_permission_grant">Cho phép</string>
+    <string name="notifications_permission_skip">Bỏ qua</string>
+
+    <!-- V2.3 / V18 — Action buttons for respondable notifications -->
+    <string name="notification_action_accept">Nhận ca</string>
+    <string name="notification_action_decline">Từ chối</string>
+    <string name="notification_action_accepted">Đã nhận</string>
+    <string name="notification_action_declined">Đã từ chối</string>
+    <string name="notification_action_accepted_hint">Bạn đã nhận ca này.</string>
+    <string name="notification_action_declined_hint">Bạn đã từ chối.</string>
+
+    <!-- Phase F — Android notification UI enhancements -->
+    <string name="notifications_filter_all">Tất cả</string>
+    <string name="notifications_filter_unread">Chưa đọc</string>
+    <string name="notifications_load_more">Tải thêm…</string>
+    <string name="notifications_empty_unread">Không có thông báo chưa đọc.</string>
+    <string name="notifications_events">Lịch sử gửi</string>
+    <string name="notifications_events_title">Lịch sử gửi thông báo</string>
+    <string name="notifications_events_empty">Chưa có lần gửi nào.</string>
+
+    <!-- Phase F — Launcher shortcut for notifications screen -->
+    <string name="notifications_shortcut_short">Thông báo</string>
+    <string name="notifications_shortcut_long">Mở thông báo</string>
+</resources>

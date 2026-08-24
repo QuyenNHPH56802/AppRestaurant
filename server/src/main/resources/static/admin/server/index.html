@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Dashboard</title>
+    <link rel="stylesheet" href="../app/app.css" />
+    <style>
+        .qr-card { display: flex; gap: 24px; align-items: center; }
+        .qr-card img { background: white; padding: 12px; border-radius: 8px; }
+        .pairing-info { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="login-page" id="login-page">
+            <form class="card" id="login-form">
+                <h1>Server Dashboard</h1>
+                <p class="warn">Đăng nhập bằng tài khoản quản trị viên để tiếp tục.</p>
+                <label>Tên đăng nhập</label>
+                <input type="text" id="login-username" required />
+                <label>Mật khẩu</label>
+                <input type="password" id="login-password" required />
+                <button type="submit">Đăng nhập</button>
+                <p class="error" id="login-error" hidden></p>
+            </form>
+        </div>
+        <div class="app" id="app" hidden>
+            <header class="topbar">
+                <div class="brand">Server Dashboard</div>
+                <div class="topbar-actions">
+                    <span class="who" id="who"></span>
+                    <button class="ghost" id="logout-btn">Đăng xuất</button>
+                    <a class="ghost" href="../app/" style="text-decoration:none;display:inline-block;padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px">Mở Admin Menu</a>
+                </div>
+            </header>
+            <main class="main">
+                <section class="content" style="padding:24px">
+                    <div class="stat-grid" id="status-stats">Đang tải…</div>
+
+                    <h2>Mã QR ghép nối</h2>
+                    <div class="card qr-card" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px">
+                        <img id="qr-img" src="/api/server/qr.png" alt="QR" width="240" height="240" />
+                        <div>
+                            <p>Quét mã QR trên thiết bị Android của nhân viên để ghép nối nhanh.</p>
+                            <p class="pairing-info" id="pairing-payload">…</p>
+                            <p class="warn" id="backup-note"></p>
+                            <button class="primary" id="backup-now">Sao lưu ngay</button>
+                        </div>
+                    </div>
+
+                    <h2 style="margin-top:24px">Bản sao lưu</h2>
+                    <table id="backups-table">
+                        <thead><tr><th>Tên file</th><th>Kích thước</th><th>Ngày</th></tr></thead>
+                        <tbody>Đang tải…</tbody>
+                    </table>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+    const state = { token: null, user: null };
+    const $ = (s) => document.querySelector(s);
+
+    async function api(path, options = {}) {
+        const headers = { 'Accept': 'application/json' };
+        if (state.token) headers['Authorization'] = `Bearer ${state.token}`;
+        if (options.body && !(options.body instanceof FormData) && typeof options.body !== 'string') {
+            headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(options.body);
+        }
+        const r = await fetch(path, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || j.success === false) throw new Error((j.error && j.error.message) || 'HTTP ' + r.status);
+        return j.data;
+    }
+
+    $('#login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+            const data = await api('/api/auth/login', { method: 'POST', body: { username: $('#login-username').value, password: $('#login-password').value } });
+            if (data.user.role !== 'ADMIN') throw new Error('Yêu cầu quyền quản trị viên');
+            state.token = data.token; state.user = data.user;
+            $('#login-page').hidden = true; $('#app').hidden = false;
+            $('#who').textContent = `${data.user.fullName} (${data.user.role})`;
+            render();
+        } catch (err) {
+            $('#login-error').textContent = err.message; $('#login-error').hidden = false;
+        }
+    });
+
+    $('#logout-btn').addEventListener('click', async () => {
+        try { await api('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+        location.reload();
+    });
+
+    $('#backup-now').addEventListener('click', async () => {
+        $('#backup-now').disabled = true;
+        $('#backup-now').textContent = 'Đang sao lưu…';
+        try { await api('/api/admin/backup', { method: 'POST' }); render(); }
+        catch (e) { alert(e.message); }
+        finally { $('#backup-now').disabled = false; $('#backup-now').textContent = 'Sao lưu ngay'; }
+    });
+
+    function fmtBytes(n) {
+        if (n < 1024) return n + ' B';
+        if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+        if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+        return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+    }
+
+    async function render() {
+        try {
+            const s = await api('/api/admin/server/status');
+            $('#status-stats').innerHTML = `
+                <div class="stat"><div class="label">Máy chủ</div><div class="value">${s.server}:${s.port}</div></div>
+                <div class="stat"><div class="label">Phiên bản</div><div class="value">${s.version}</div></div>
+                <div class="stat"><div class="label">Uptime</div><div class="value">${Math.floor(s.uptimeMs / 1000 / 60)} phút</div></div>
+                <div class="stat"><div class="label">Dung lượng DB</div><div class="value">${fmtBytes(s.dataSizeBytes)}</div></div>
+                <div class="stat"><div class="label">Bản sao lưu</div><div class="value">${s.backupCount}</div></div>
+                <div class="stat"><div class="label">JVM</div><div class="value">${s.java}</div></div>
+                <div class="stat"><div class="label">HĐH</div><div class="value">${s.os}</div></div>
+            `;
+            $('#pairing-payload').textContent = `http://${s.server}:${s.port}`;
+            $('#backup-note').textContent = `Lưu trữ tại ${s.dataDir}`;
+        } catch (e) {
+            $('#status-stats').innerHTML = `<p class="error">${e.message}</p>`;
+        }
+        try {
+            const list = await api('/api/admin/backup/list');
+            const tbody = document.querySelector('#backups-table tbody');
+            if (!list.files.length) {
+                tbody.innerHTML = `<tr><td colspan="3">Chưa có bản sao lưu nào.</td></tr>`;
+            } else {
+                tbody.innerHTML = list.files.map(f => `
+                    <tr><td>${f.name}</td><td>${fmtBytes(f.size)}</td><td>${new Date(f.created).toLocaleString()}</td></tr>
+                `).join('');
+            }
+        } catch (e) {
+            document.querySelector('#backups-table tbody').innerHTML = `<tr><td colspan="3">${e.message}</td></tr>`;
+        }
+    }
+    </script>
+</body>
+</html>
