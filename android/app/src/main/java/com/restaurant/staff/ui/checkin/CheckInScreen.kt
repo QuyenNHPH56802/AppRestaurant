@@ -49,8 +49,8 @@ fun CheckInScreen(
                     z = z,
                     lang = lang,
                     working = state.working,
-                    onCheckIn = { viewModel.toggle(z.id ?: return@items, "CHECK_IN") },
-                    onCheckOut = { viewModel.toggle(z.id ?: return@items, "CHECK_OUT") }
+                    onCheckIn = { z.id?.let { id -> viewModel.toggle(id, "CHECK_IN") } },
+                    onCheckOut = { z.id?.let { id -> viewModel.toggle(id, "CHECK_OUT") } }
                 )
             }
         }

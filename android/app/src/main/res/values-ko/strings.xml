@@ -128,7 +128,6 @@
     <string name="profile_exit_kiosk">키오스크 모드 종료</string>
     <string name="kiosk_exit_dialog_title">키오스크를 종료하려면 관리자 PIN을 입력하세요</string>
     <string name="kiosk_exit_confirm">종료</string>
-    <string name="common_cancel">취소</string>
 
     <string name="phase_banner">PHASE 1 — 스켈레톤. APK가 빌드되어 실행됩니다. PHASE 5+에서 실제 화면이 추가됩니다.</string>
 

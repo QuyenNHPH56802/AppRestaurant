@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -70,7 +71,7 @@ class RestaurantFcmService : FirebaseMessagingService() {
         // data.title_ko (see NotificationService.putData("payload")). When
         // the server hasn't pre-rendered (older versions) we fall back to
         // FCM's own notification body so something is still shown.
-        val lang = runCatching { localeStore.language.first() }.getOrDefault("vi")
+        val lang = runBlocking { localeStore.language.first() }
         val title = data["title_$lang"] ?: data["title_vi"]
             ?: message.notification?.title
             ?: "Thông báo"

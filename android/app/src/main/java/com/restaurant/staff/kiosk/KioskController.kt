@@ -65,8 +65,7 @@ class KioskController(
 
     /** Begin Screen Pinning (fallback path). */
     fun startScreenPinning(activity: Activity) {
-        val am = activity.getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-        am.startLockTask()
+        activity.startLockTask()
     }
 
     /** End Screen Pinning. */
@@ -118,10 +117,7 @@ class RestaurantAdminReceiver : DeviceAdminReceiver() {
         // Device Owner is now active.
     }
 
+    @Suppress("DEPRECATION")
     override fun onDisableRequested(context: Context, intent: Intent): CharSequence =
         "Restaurant Staff Device Owner is required for Kiosk Mode."
-
-    override fun onDisable(context: Context) {
-        // App lost Device Owner — kiosk restrictions (if any) were cleared by the OS.
-    }
 }

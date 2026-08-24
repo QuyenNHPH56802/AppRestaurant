@@ -49,16 +49,16 @@ class HomeViewModel @Inject constructor(
                 val user = session.user.first()
                 val featured = foods.featured(currentLang, 10)
                 val popular = foods.list(currentLang, page = 0, size = 12).items.orEmpty()
-                val store = store.get(currentLang)
-                Quad(user, store, featured, popular)
+                val storeInfo = store.get(currentLang)
+                Quad(user, storeInfo, featured, popular)
             }.fold(
                 onSuccess = { q ->
                     _state.update {
                         it.copy(
-                            fullName = q.user?.fullName,
-                            storeName = q.store?.name,
-                            featured = q.featured,
-                            popular = q.popular,
+                            fullName = q.a?.fullName,
+                            storeName = q.b?.name,
+                            featured = q.c,
+                            popular = q.d,
                             loading = false,
                             error = null
                         )

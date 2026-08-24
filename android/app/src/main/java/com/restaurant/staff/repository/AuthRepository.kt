@@ -26,7 +26,7 @@ class AuthRepository @Inject constructor(
         }
         val data: LoginResponseDto = resp.data
         val user = data.user ?: throw AuthException("NO_USER", "Server did not return user")
-        session.save(data.token, user)
+        session.save(data.token!!, user)
         // V2.3 / V18 — register the device for push right after login so the
         // server can dispatch to this token from the first shift-assigned push.
         // Best-effort: failure must not roll back the login.

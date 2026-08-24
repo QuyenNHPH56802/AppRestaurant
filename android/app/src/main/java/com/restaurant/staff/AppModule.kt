@@ -1,6 +1,7 @@
 package com.restaurant.staff
 
 import android.content.Context
+import com.restaurant.staff.fcm.NotificationPrefsStore
 import com.restaurant.staff.fcm.TokenStore
 import com.restaurant.staff.kiosk.KioskController
 import com.restaurant.staff.network.ApiClientProvider

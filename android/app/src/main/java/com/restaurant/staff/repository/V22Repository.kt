@@ -7,7 +7,6 @@ import com.restaurant.staff.network.ChecklistCompletionDto
 import com.restaurant.staff.network.ChecklistViewDto
 import com.restaurant.staff.network.ShiftAssignmentRespondRequest
 import com.restaurant.staff.network.ShiftAssignmentViewDto
-import com.restaurant.staff.network.ShiftViewDto
 import com.restaurant.staff.network.V22Api
 import com.restaurant.staff.network.ZoneAssignRequest
 import com.restaurant.staff.network.ZoneAssignmentDto
@@ -23,7 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class V22Repository @Inject constructor(private val api: V22Api) {
 
-    suspend fun listShifts(): List<ShiftViewDto> = unwrap { api.myShifts() }
+    suspend fun listShifts(): List<ShiftAssignmentViewDto> = unwrap { api.myShifts() }
 
     suspend fun respondShift(id: Long, status: String, notes: String?): ShiftAssignmentViewDto {
         val req = ShiftAssignmentRespondRequest(status = status, notes = notes)

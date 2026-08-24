@@ -132,7 +132,6 @@
     <string name="profile_exit_kiosk">Thoát chế độ Kiosk</string>
     <string name="kiosk_exit_dialog_title">Nhập PIN quản trị để thoát Kiosk</string>
     <string name="kiosk_exit_confirm">Thoát</string>
-    <string name="common_cancel">Hủy</string>
 
     <!-- Store -->
     <string name="store_address">Địa chỉ</string>

@@ -62,7 +62,8 @@ class ZonesViewModel @Inject constructor(
             runCatching {
                 val user = session.user.first()
                     ?: throw IllegalStateException("Not signed in")
-                repo.selfAssignZone(user.id, zoneId, reason = "self-service")
+                val userId = user.id ?: throw IllegalStateException("User ID not found")
+                repo.selfAssignZone(userId, zoneId, reason = "self-service")
             }.onSuccess {
                 _state.update { it.copy(workingZoneId = null) }
                 refresh()
