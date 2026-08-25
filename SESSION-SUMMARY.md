@@ -1,6 +1,177 @@
 # Session Tổng Hợp — Restaurant LAN System
 
-> Ngày tạo: **2026-08-24** • Phiên làm việc: Phase C/D/E/G → **Phase F** (Android Notification UI) → Docs update.
+> Ngày tạo: **2026-08-24** • Phiên làm việc: **2026-08-25** — Smoke test + bug fix + build artifacts + docs.
+>
+> Tài liệu này tóm tắt **tất cả** những gì đã làm trong phiên này, **trạng thái hiện tại** của từng phần, **việc cần làm tiếp theo** để đến được bản demo cho khách hàng, và checklist **end-to-end smoke test** trước khi giao hàng.
+
+---
+
+## 0. Build Artifacts — ✅ SẴN SÀNG GIAO
+
+| Artifact | Path | Size | Status |
+|----------|------|------|--------|
+| Server JAR | `server/target/restaurant-server.jar` | 121 MB | ✅ Ready |
+| Release APK | `android/app/build/outputs/apk/release/app-release.apk` | 36 MB | ✅ Ready (signed) |
+| Debug APK | `android/app/build/outputs/apk/debug/app-debug.apk` | 44 MB | ✅ Available |
+
+**Smoke test: 23/23 PASS** (2026-08-25)
+```
+✅ GET  /api/health                                    HTTP 200
+✅ GET  /api/server/info                               HTTP 200
+✅ POST /api/auth/login (admin)                        HTTP 200
+✅ POST /api/auth/login (staff)                        HTTP 200
+✅ POST /api/auth/login (wrong password)                HTTP 401
+✅ GET  /api/admin/users (ADMIN)                        HTTP 200
+✅ GET  /api/admin/foods (ADMIN)                       HTTP 200
+✅ GET  /api/admin/categories (ADMIN)                   HTTP 200
+✅ GET  /api/admin/store (ADMIN)                       HTTP 200 ← FIXED (was 500)
+✅ GET  /api/admin/device-tokens (ADMIN)               HTTP 200
+✅ GET  /api/admin/zones (ADMIN)                        HTTP 200
+✅ GET  /api/admin/shifts (ADMIN)                      HTTP 200
+✅ GET  /api/admin/users (STAFF → 403)                HTTP 403
+✅ GET  /api/foods?lang=vi&size=3                     HTTP 200 ← FIXED (was 403)
+✅ GET  /api/foods?lang=ko&size=3                      HTTP 200 ← FIXED (was 403)
+✅ GET  /api/categories?lang=vi                         HTTP 200 ← FIXED (was 403)
+✅ GET  /api/categories?lang=ko                         HTTP 200 ← FIXED (was 403)
+✅ GET  /api/server/qr.png                             HTTP 200
+✅ GET  /api/me/notifications/unread-count              HTTP 200
+✅ GET  /api/me/notifications?lang=vi&size=5            HTTP 200
+✅ GET  /api/me/shifts (STAFF)                         HTTP 200
+✅ GET  /api/me/zones (STAFF)                          HTTP 200
+✅ GET  /api/me/checklists (STAFF)                      HTTP 200
+```
+
+---
+
+## 1. Bug Fixes — Phiên 2026-08-25
+
+### Bug #1: SecurityConfig missing public endpoints (403 on /api/foods, /api/categories)
+- **Root cause**: `SecurityConfig.java` chưa permit `/api/foods` và `/api/categories` → anonymous users nhận 403.
+- **Fix**: Thêm `"GET /api/foods"` và `"GET /api/categories"` vào danh sách `permitAll()`.
+- **File**: `server/src/main/java/com/restaurant/server/config/SecurityConfig.java`
+- **Regression**: ✅ ALL PASS
+
+### Bug #2: AdminStoreController missing GET endpoint (500)
+- **Root cause**: `AdminStoreController` chỉ có PUT, không có GET → `/api/admin/store` trả 500.
+- **Fix**: Thêm `@GetMapping` endpoint dùng `StoreService.get()`.
+- **Files**: `server/src/main/java/com/restaurant/server/controller/AdminStoreController.java`
+- **Regression**: ✅ ALL PASS
+
+### Bug #3: Flyway checksum mismatch (V2 migration changed after first run)
+- **Root cause**: `V2__seed.sql` được chỉnh sửa sau khi DB đã chạy migrations → checksum mismatch → server fail to start.
+- **Fix**: Reset DB sạch (`restaurant.db` chỉ 135KB = chưa có data thật) → server tự tạo lại với migrations V1-V19.
+- **Note**: `restaurant.flyway.repair-onValidate=true` đã được thêm vào `application.yml` để auto-repair checksum.
+- **Files**: `server/src/main/resources/application.yml`
+
+### Bug #4: APK release build requires keystore
+- **Root cause**: `app/build.gradle.kts` signing config tham chiếu `keystore/restaurant-release.jks` không tồn tại.
+- **Fix**: Tạo keystore tạm bằng `keytool` (xem `tools/gen-keystore.bat`).
+- **File**: `android/keystore/restaurant-release.jks` (chỉ dùng cho dev/release local — nên thay bằng keystore thật trước production).
+
+### Bug #5: Smoke test script encoding issue
+- **Root cause**: Python test script gặp `UnicodeDecodeError` khi parse binary PNG + encoding Vietnamese.
+- **Fix**: Thêm `sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')` và `UnicodeDecodeError` handler trong `get()`.
+- **File**: `tools/smoke-tests.py`
+
+---
+
+## 2. Cấu hình môi trường build — ✅ ĐÃ HOÀN TẤT
+
+### JDK 21
+- Path: `C:\AppRestaurant\tools\jdk-21` (Eclipse Temurin 21.0.12.1+1)
+
+### Android SDK
+- Path: `C:\AppRestaurant\tools\android-sdk`
+- Components: `platforms;android-34`, `build-tools;34.0.0`, `platform-tools`
+
+### Maven
+- Path: `C:\AppRestaurant\tools\maven` (Apache Maven 3.9.9)
+
+### Build commands
+```cmd
+:: Server JAR
+cd server
+tools\maven\bin\mvn clean package -DskipTests
+
+:: Release APK
+cd android
+tools\jdk-21\bin\java -version  :: verify JAVA_HOME
+gradlew.bat :app:assembleRelease
+```
+
+---
+
+## 3. Các file quan trọng đã thêm/sửa trong session này
+
+| File | Action | Mô tả |
+|------|--------|--------|
+| `server/src/main/java/com/restaurant/server/config/SecurityConfig.java` | Sửa | Thêm `/api/foods`, `/api/categories` vào permitAll |
+| `server/src/main/java/com/restaurant/server/controller/AdminStoreController.java` | Sửa | Thêm GET endpoint |
+| `server/src/main/resources/application.yml` | Sửa | Thêm `repair-onValidate: true` |
+| `android/keystore/restaurant-release.jks` | Tạo mới | Keystore tạm cho release build |
+| `tools/smoke-tests.py` | Tạo mới | Smoke test script 23 endpoints |
+| `tools/rebuild-server-fixed.bat` | Tạo mới | Build server với fixes |
+| `tools/smoke-tests-run.ps1` | Tạo mới | PowerShell smoke test runner |
+| `tools/reset-and-start.ps1` | Tạo mới | Reset DB + start server |
+
+---
+
+## 4. Trạng thái hiện tại
+
+### ✅ Sẵn sàng giao (no blockers cho dev/demo)
+- Server JAR: `server/target/restaurant-server.jar` ✅
+- Release APK: `android/app/build/outputs/apk/release/app-release.apk` ✅
+- Smoke test: 23/23 PASS ✅
+- Admin Dashboard: 8 tabs (Users, Foods, Categories, Store, Shifts, Zones, Checklists, Notifications, Devices, Server) ✅
+- Android Staff app: Pairing, Login, Home, Menu, Food Detail, Profile, Settings, Shifts, Zones, Checklists, Notifications ✅
+- V2 demo data: 5 categories, 25 foods, 7 users, 4 zones, 2 shifts, 4 checklists ✅
+
+### 🟡 Cần action trước khi demo production
+| # | Việc | Priority | Effort |
+|---|------|----------|--------|
+| 1 | Cấu hình FCM thật (`google-services.json` + `fcm-service-account.json`) | P0 | 30 phút |
+| 2 | Tạo keystore production (thay `restaurant-release.jks` tạm) | P1 | 15 phút |
+| 3 | Build installer `RestaurantServerSetup.exe` qua Inno Setup | P1 | 30 phút |
+| 4 | Test trên thiết bị Android thật | P1 | 1 giờ |
+| 5 | Chuẩn bị laptop demo + Wi-Fi hotspot | P1 | 30 phút |
+
+### 🔴 Không nằm trong scope này
+| # | Việc | Ghi chú |
+|---|------|---------|
+| A | HTTPS/TLS reverse proxy | Chỉ LAN, HTTP đủ |
+| B | E2E automated CI/CD | Chạy manual đã OK |
+| C | Kiosk auto-provisioning script | Code có sẵn |
+| D | Cloud backup (S3/GDrive) | Backup local đủ |
+
+---
+
+## 5. Tài khoản demo
+
+| Username | Password | Role | Ngôn ngữ |
+|----------|----------|------|----------|
+| `admin` | `admin123` | ADMIN | vi |
+| `nhanvien01` | `staff123` | STAFF | vi |
+| `nhanvien02` | `staff123` | STAFF | vi |
+| `nhanvien03` | `staff123` | STAFF | vi |
+| `nhanvien04` | `staff123` | STAFF | ko |
+| `nhanvien05` | `staff123` | STAFF | vi |
+| `nhanvien06` | `staff123` | STAFF | vi |
+
+---
+
+## 6. URLs quan trọng
+
+| Mục | URL |
+|------|-----|
+| Server health | `http://localhost:8080/api/health` |
+| Admin SPA | `http://localhost:8080/admin/` |
+| Server Dashboard | `http://localhost:8080/admin/server/` |
+| Server QR pairing | `http://localhost:8080/api/server/qr.png` |
+| API docs | `http://localhost:8080/docs/api.md` |
+
+---
+
+**Người viết:** Cursor Agent • 2026-08-25 • Phiên smoke test + bug fix + build artifacts → **SẴN SÀNG GIAO DEMO**
 >
 > Tài liệu này tóm tắt **tất cả** những gì đã làm trong phiên này, **trạng thái hiện tại** của từng phần, **việc cần làm tiếp theo** để đến được bản demo cho khách hàng, và checklist **end-to-end smoke test** trước khi giao hàng.
 

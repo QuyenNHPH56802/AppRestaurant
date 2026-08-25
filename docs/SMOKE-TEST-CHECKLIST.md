@@ -1,12 +1,15 @@
-# Smoke Test Checklist - Demo ngày .../...
+# Smoke Test Checklist — 2026-08-25
+
+> **Port**: Server chạy trên **port 8080** (mặc định).
+> Chạy smoke test tự động: `python tools/smoke-tests.py`
 
 ## A. Chuẩn bị (10 phút trước demo)
 
-- [ ] Server đang chạy trên laptop demo (`http://localhost:18080`)
+- [ ] Server đang chạy trên laptop demo (`http://localhost:8080`)
 - [ ] Android app đã cài và đăng nhập bằng `admin / admin123` (lần đầu)
 - [ ] Đã in QR zones (4 QR: Bếp phở, Bún chả, Phục vụ, Kho) và dán ở khu vực tương ứng
-- [ ] Đã scan QR server trên thiết bị để kết nối (`http://192.168.x.x:18080`)
-- [ ] Data đã seed (7 users, 4 zones, 3 shifts, 25 foods, 40 checklist tasks)
+- [ ] Đã scan QR server trên thiết bị để kết nối (`http://192.168.x.x:8080`)
+- [ ] Data đã seed (7 users, 4 zones, 2 shifts, 25 foods, 4 checklists)
 
 ## B. Login & kết nối (5 phút)
 
@@ -89,10 +92,24 @@
 | `nhanvien05` | `staff123` | STAFF | vi |
 | `nhanvien06` | `staff123` | STAFF | vi |
 
-## URL quan trọng
+## URLs quan trọng
 
-- Health: `http://localhost:18080/api/health`
-- Server info: `http://localhost:18080/api/server/info`
-- Server QR: `http://localhost:18080/api/server/qr.png`
-- Zone QR: `http://localhost:18080/api/zones/{CODE}/qr.png` (CODE: BEP_PHO, BUN_CHA, PHUC_VU, KHO)
-- Admin SPA: `http://localhost:18080/admin/`
+| Mục | URL |
+|------|-----|
+| Health | `http://localhost:8080/api/health` |
+| Server info | `http://localhost:8080/api/server/info` |
+| Server QR | `http://localhost:8080/api/server/qr.png` |
+| Zone QR | `http://localhost:8080/api/zones/{CODE}/qr.png` (CODE: BEP_PHO, BUN_CHA, PHUC_VU, KHO) |
+| Admin SPA | `http://localhost:8080/admin/` |
+| Server Dashboard | `http://localhost:8080/admin/server/` |
+
+## Auto smoke test
+
+```bash
+python tools/smoke-tests.py
+# Expected: Total: 23 | PASS: 23 | FAIL: 0
+```
+
+## Pass criteria
+
+All checkboxes + auto smoke test 23/23 must pass before delivery.

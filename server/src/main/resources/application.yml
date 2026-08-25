@@ -31,6 +31,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
+    repair-onValidate: true
     # Allow PRAGMA + DDL + DML in the same migration (V1 contains PRAGMA foreign_keys
     # alongside CREATE TABLE). Without this, Flyway 10+ rejects V1.
     mixed: true

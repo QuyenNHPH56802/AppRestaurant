@@ -38,6 +38,8 @@ public class SecurityConfig {
                     "/api/server/info",
                     "/api/server/qr.png",
                     "/api/zones/*/qr.png",
+                    "/api/foods",
+                    "/api/categories",
                     "/admin/**",
                     "/uploads/**",
                     "/error"

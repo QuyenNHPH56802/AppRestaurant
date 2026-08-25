@@ -109,6 +109,11 @@ server/target/failsafe-reports/
 coverage/
 *.lcov
 
+# ─── Local dev tools (JDK, Android SDK) ──────────────────────
+# These are installed into tools/ by SETUP-DEVELOPMENT.md.
+# Re-run the setup script if you erase the folder.
+tools/
+
 # ─── Generated / vendored ────────────────────────────────────
 **/BOOT-INF/lib/
 server/BOOT-INF/
